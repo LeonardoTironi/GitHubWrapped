@@ -48,16 +48,22 @@ export default async function Home() {
           <LoginButton />
         </div>
 
-        {/* Footer Info */}
-        <div className="mt-24 flex items-center gap-4 text-xs text-gray-500 uppercase tracking-widest">
-          <a
-            href="https://leonardotironi.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Made by Leonardo Tironi
-          </a>
-        </div>
+        <footer className="mt-24 flex flex-col items-center gap-4 text-center">
+          <div className="flex items-center gap-4 text-xs text-gray-500 uppercase tracking-widest font-medium">
+            <a
+              href="https://leonardotironi.vercel.app"
+              target="_blank"
+              className="hover:text-blue-400 transition-colors"
+            >
+              Made by Leonardo Tironi
+            </a>
+          </div>
+
+          <p className="max-w-xs text-[10px] text-gray-600 leading-tight">
+            Este projeto não é afiliado ou endossado pelo GitHub Inc. GitHub e
+            as marcas relacionadas são propriedades de seus respectivos donos.
+          </p>
+        </footer>
       </main>
     </div>
   );
