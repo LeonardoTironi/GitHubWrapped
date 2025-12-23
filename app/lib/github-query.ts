@@ -1,5 +1,4 @@
 import { Octokit } from "@octokit/core";
-import { Session } from "next-auth";
 import { RawGraphQLData } from "./stats-processor";
 
 /**
@@ -77,7 +76,11 @@ export const GITHUB_WRAPPED_QUERY = `
 /**
  * Busca os dados brutos e mensagens de commit do GitHub
  */
-export async function fetchGitHubStats(session: Session) {
+export async function fetchGitHubStats(session: { 
+  accessToken?: string; 
+  login?: string;
+  user?: { login?: string };
+}) {
   if (!session?.accessToken) {
     throw new Error("Não autenticado");
   }
@@ -88,8 +91,10 @@ export async function fetchGitHubStats(session: Session) {
 
   // 1. Busca dados do GitHub via GraphQL
   const currentYear = new Date().getFullYear();
+  const userLogin = session.login || session.user?.login || "";
+  
   const data = await octokit.graphql(GITHUB_WRAPPED_QUERY, {
-    login: session.user?.login || "",
+    login: userLogin,
     from: `${currentYear}-01-01T00:00:00Z`,
     to: `${currentYear}-12-31T23:59:59Z`,
   }) as RawGraphQLData;
@@ -105,7 +110,7 @@ export async function fetchGitHubStats(session: Session) {
         const { data: commits } = await octokit.request(
           "GET /repos/{owner}/{repo}/commits",
           {
-            owner: session.user?.login || "",
+            owner: userLogin,
             repo: repo.name,
             per_page: 20,
           }

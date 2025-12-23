@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { getToken } from "next-auth/jwt";
 import satori from "satori";
 import sharp from "sharp";
 import { readFile } from "fs/promises";
@@ -36,12 +37,31 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // ✅ SEGURO: Verifica autenticação
     const session = await auth();
-    if (!session || !session.accessToken) {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    
+    // ✅ SEGURO: Obtém token do JWT (server-side only)
+    const token = await getToken({ 
+      req: req,
+      secret: process.env.AUTH_SECRET
+    });
+    
+    if (!token?.accessToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    // Cria objeto de sessão com accessToken apenas para uso interno
+    const sessionWithToken = {
+      ...session,
+      accessToken: token.accessToken as string,
+      login: token.login as string,
+    };
+    
     // 1. Fetch GitHub data
-    const { data, commitMessages } = await fetchGitHubStats(session);
+    const { data, commitMessages } = await fetchGitHubStats(sessionWithToken);
 
     // 2. Process statistics
     const stats = processGitHubStats(data, commitMessages.slice(0, 100));

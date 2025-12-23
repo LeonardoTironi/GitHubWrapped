@@ -1,6 +1,6 @@
 /**
  * Landing Page - GitHub Wrapped 2025
- * Home page with login button via GitHub OAuth
+ * Estilizada com a identidade visual do GitHub Universe '25
  */
 
 import { auth } from "@/auth";
@@ -10,32 +10,53 @@ import LoginButton from "@/app/components/LoginButton";
 export default async function Home() {
   const session = await auth();
 
-  // If already authenticated, redirect to wrapped
+  // Redirecionamento se já autenticado
   if (session) {
     redirect("/wrapped");
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-gray-900 via-purple-900 to-violet-900">
-      <main className="flex flex-col items-center justify-center px-4 py-16 text-center">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#0d1117] overflow-hidden">
+      {/* Efeito Nebula/Glow inspirado no Universe '25 */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-900/20 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-900/20 blur-[120px] rounded-full" />
+
+      <main className="relative z-10 flex flex-col items-center justify-center px-4 py-16 text-center">
+        {/* Badge superior (Universe Style) */}
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gray-700 bg-gray-900/50 px-4 py-1 text-sm text-gray-300 backdrop-blur-md">
+          <span>Dev Wrapped</span>
+        </div>
+
         {/* Logo and Title */}
         <div className="mb-8">
-          <h1 className="text-6xl font-bold text-white mb-4">GitHub Wrapped</h1>
-          <p className="text-2xl text-purple-200 font-semibold">2025</p>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-[#f0f6fc] mb-4">
+            Dev Wrapped
+            <br />
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-purple-500">
+              What have you built in 2025?
+            </span>
+          </h1>
         </div>
 
         {/* Description */}
-        <p className="text-lg text-gray-300 max-w-2xl mb-12">
-          Discover your development stats for 2025! Connect with your GitHub
-          account and see your year in commits, languages, streaks, and more.
+        <p className="max-w-2xl text-lg md:text-xl text-[#8b949e] mb-12 leading-relaxed">
+          Show your impact on GitHub in 2025 with a personalized summary card.
         </p>
 
-        {/* Login Button */}
-        <LoginButton />
+        {/* Login Button Area */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 cursor-pointer">
+          <LoginButton />
+        </div>
 
         {/* Footer Info */}
-        <div className="mt-16 text-sm text-gray-400">
-          <p>Developed with Next.js, Auth.js, and the GitHub GraphQL API</p>
+        <div className="mt-24 flex items-center gap-4 text-xs text-gray-500 uppercase tracking-widest">
+          <a
+            href="https://leonardotironi.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Made by Leonardo Tironi
+          </a>
         </div>
       </main>
     </div>

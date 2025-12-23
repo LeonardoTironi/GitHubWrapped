@@ -41,7 +41,7 @@ export const WrappedCard = ({ data }: { data: WrappedData }) => {
         }}
       >
         <span style={{ fontSize: "54px", fontWeight: 700, color: "#c9d1d9" }}>
-          GitHub Wrapped {data.year}
+          Dev Wrapped {data.year}
         </span>
         <span style={{ fontSize: "32px", color: "#8b949e", marginTop: "8px" }}>
           @{data.username}
@@ -195,7 +195,7 @@ export const WrappedCard = ({ data }: { data: WrappedData }) => {
         style={{ display: "flex", marginTop: "auto", justifyContent: "center" }}
       >
         <span style={{ fontSize: "16px", color: "#484f58" }}>
-          Generated at github-wrapped-2025.vercel.app
+          Generated at dev-wrapped-2025.vercel.app
         </span>
       </div>
     </div>

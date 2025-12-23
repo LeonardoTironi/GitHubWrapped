@@ -1,12 +1,24 @@
 import type { NextConfig } from "next";
-
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: https://avatars.githubusercontent.com;
+    font-src 'self' data:;
+    connect-src 'self' https://api.github.com;
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+`.replace(/\s{2,}/g, ' ').trim();
 const nextConfig: NextConfig = {
-  // Security Headers
   async headers() {
     return [
       {
         source: "/:path*",
         headers: [
+          {
+            key: "Content-Security-Policy",
+            value: cspHeader,
+          },
           {
             key: "X-DNS-Prefetch-Control",
             value: "on",

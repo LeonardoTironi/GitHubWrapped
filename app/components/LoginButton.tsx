@@ -6,7 +6,7 @@ export default function LoginButton() {
   return (
     <button
       onClick={() => signIn("github", { callbackUrl: "/wrapped" })}
-      className="flex items-center gap-3 px-8 py-4 bg-white text-gray-900 font-semibold rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-2xl"
+      className="flex items-center gap-3 px-8 py-4 bg-white text-gray-900 font-semibold rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-2xl  cursor-pointer"
     >
       <svg
         className="w-6 h-6"

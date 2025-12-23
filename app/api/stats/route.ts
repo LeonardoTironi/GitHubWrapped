@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { getToken } from "next-auth/jwt";
 import { processGitHubStats } from "@/app/lib/stats-processor";
 import { fetchGitHubStats } from "@/app/lib/github-query";
 import { rateLimit, getClientIdentifier } from "@/app/lib/rate-limit";
@@ -31,13 +32,30 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // ✅ SEGURO: Verifica autenticação primeiro
     const session = await auth();
-    
-    if (!session?.accessToken) {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
-    const { data, commitMessages } = await fetchGitHubStats(session);
+    // ✅ SEGURO: Obtém o token do JWT (server-side only)
+    const token = await getToken({ 
+      req: req as any,
+      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+    });
+    
+    if (!token?.accessToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    // Cria objeto de sessão com accessToken apenas para uso interno
+    const sessionWithToken = {
+      ...session,
+      accessToken: token.accessToken as string,
+      login: token.login as string,
+    };
+    
+    const { data, commitMessages } = await fetchGitHubStats(sessionWithToken);
 
     const stats = processGitHubStats(data, commitMessages.slice(0, 100));
 
