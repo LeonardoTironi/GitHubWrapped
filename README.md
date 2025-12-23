@@ -1,36 +1,161 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitHub Wrapped 2025
 
-## Getting Started
+Uma aplicação web que gera um "Wrapped" visual das suas estatísticas de desenvolvimento no GitHub em 2025.
 
-First, run the development server:
+## 📋 Sobre o Projeto
+
+O GitHub Wrapped permite que você visualize suas métricas de desenvolvimento em 2025:
+
+- Total de commits e streak máximo
+- Linguagens mais utilizadas
+- Repositórios criados
+- Categorização do seu estilo de commit (Arquiteto vs Poeta)
+- Geração de imagem PNG para compartilhamento
+
+## 🚀 Tech Stack
+
+- **Framework**: Next.js 16
+- **Autenticação**: NextAuth.js com GitHub Provider
+- **API Client**: @octokit/core (GraphQL)
+- **Estilização**: Tailwind CSS
+- **Geração de Imagem**: Satori + @resvg/resvg-js
+- **Tipografia**: Mona Sans (GitHub Official)
+
+## 📦 Instalação
+
+### 1. Clone o repositório
+
+```bash
+git clone <url-do-repositorio>
+cd github-wrapped
+```
+
+### 2. Instale as dependências base
+
+```bash
+npm install
+```
+
+### 3. Instale as dependências adicionais do projeto
+
+```bash
+npm install next-auth@beta @octokit/core satori @resvg/resvg-js
+```
+
+### 4. Configure as variáveis de ambiente
+
+Crie um arquivo `.env.local` na raiz do projeto:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Edite o arquivo `.env.local` e configure:
+
+1. **Crie uma OAuth App no GitHub**:
+
+   - Acesse: https://github.com/settings/developers
+   - Clique em "New OAuth App"
+   - Application name: `GitHub Wrapped Local` (ou outro nome)
+   - Homepage URL: `http://localhost:3000`
+   - Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
+   - Copie o **Client ID** e **Client Secret**
+
+2. **Preencha as variáveis**:
+
+```env
+GITHUB_ID=seu_client_id_aqui
+GITHUB_SECRET=seu_client_secret_aqui
+NEXTAUTH_SECRET=gere_um_hash_aleatorio_aqui
+NEXTAUTH_URL=http://localhost:3000
+```
+
+Para gerar o `NEXTAUTH_SECRET`:
+
+```bash
+openssl rand -base64 32
+```
+
+### 5. Execute o projeto
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📂 Estrutura do Projeto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/
+├── api/
+│   ├── auth/
+│   │   └── [...nextauth]/
+│   │       └── route.ts          # Configuração NextAuth
+│   └── generate-wrapped/
+│       └── route.ts              # Geração da imagem
+├── components/
+│   └── WrappedCard.tsx          # Componente visual do card
+├── lib/
+│   ├── github-query.ts          # Query GraphQL
+│   └── stats-processor.ts       # Processamento de métricas
+├── wrapped/
+│   └── page.tsx                 # Página de resultado
+├── globals.css
+├── layout.tsx
+└── page.tsx                     # Landing page
+```
 
-## Learn More
+## 🔧 Funcionalidades Implementadas
 
-To learn more about Next.js, take a look at the following resources:
+### Fase 1: Autenticação ✅
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [x] GitHub OAuth com scopes `read:user` e `repo`
+- [x] Armazenamento do accessToken na sessão
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Fase 2: Coleta de Dados ✅
 
-## Deploy on Vercel
+- [x] Query GraphQL para contribuições, PRs e commits
+- [x] Análise de linguagens de programação
+- [x] Amostragem de commits para auditoria
+- [x] Cálculo de seguidores e repositórios
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Fase 3: Processamento ✅
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [x] Cálculo de Streak (dias consecutivos)
+- [x] Auditoria de Conventional Commits
+- [x] Categorização: Arquiteto vs Poeta
+- [x] Top 5 linguagens mais utilizadas
+
+### Fase 4: Geração de Imagem ✅
+
+- [x] Componente React para Satori
+- [x] Conversão SVG para PNG
+- [x] Download e compartilhamento
+
+## 🎨 Design
+
+O design segue a identidade visual do GitHub:
+
+- Paleta de cores escura (#0d1117)
+- Tipografia Mona Sans
+- Gradientes roxos e violetas
+- Barras de progresso para linguagens
+
+## 📝 Notas de Desenvolvimento
+
+- **Conventional Commits**: Mensagens que seguem o padrão `tipo(escopo): descrição`
+- **Rate Limit**: Tratamento de erros da API do GitHub
+- **Privacidade**: Opção futura para ocultar nomes de repositórios privados
+
+## 🚀 Próximos Passos
+
+- [ ] Implementar cálculo de Peak Hour (horário de pico)
+- [ ] Adicionar animações de loading
+- [ ] Implementar cache de imagens geradas
+- [ ] Deploy em produção (Vercel)
+- [ ] Suporte a múltiplos anos
+
+## 📄 Licença
+
+Este projeto é de código aberto para fins educacionais.
