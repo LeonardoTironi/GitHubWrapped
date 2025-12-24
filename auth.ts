@@ -16,16 +16,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true, // ✅ Necessário para produção (Vercel)
   callbacks: {
     async jwt({ token, account, profile }) {
+      console.log('[AUTH/JWT] Callback executed', {
+        hasAccount: !!account,
+        hasAccessToken: !!account?.access_token,
+        hasProfile: !!profile,
+      });
+      
       // ✅ SEGURO: Salva o accessToken APENAS no JWT (server-side, criptografado)
       if (account) {
         token.accessToken = account.access_token;
+        console.log('[AUTH/JWT] Access token saved to JWT');
       }
       if (profile) {
         token.login = (profile as { login?: string }).login;
+        console.log('[AUTH/JWT] Login saved:', token.login);
       }
       return token;
     },
     async session({ session, token }) {
+      console.log('[AUTH/SESSION] Callback executed', {
+        hasToken: !!token,
+        hasLogin: !!token.login,
+        hasAccessToken: !!token.accessToken,
+      });
+      
       // ✅ SEGURO: NÃO expõe o accessToken na sessão
       // Apenas dados públicos são passados para a sessão
       if (token.login && session.user) {
