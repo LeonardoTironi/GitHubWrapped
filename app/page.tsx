@@ -33,7 +33,7 @@ export default async function Home() {
             Dev Wrapped
             <br />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-purple-500">
-              What have you built in 2025?
+              See what you built in 2025
             </span>
           </h1>
         </div>
