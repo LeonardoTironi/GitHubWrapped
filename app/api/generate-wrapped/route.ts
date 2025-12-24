@@ -52,32 +52,31 @@ export async function GET(req: NextRequest) {
       hasUser: !!session?.user,
     });
     
-    if (!session) {
+    if (!session?.user) {
       console.error('[API/GENERATE] ERROR: No session found');
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
-    // ✅ SEGURO: Obtém token do JWT (server-side only)
-    const token = await getToken({ 
-      req: req,
-      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
-    });
+
+    const accessToken = (session as any).accessToken;
+    const login = (session as any).user?.login || session.user.name;
     
     console.log('[API/GENERATE] Token check:', {
-      hasToken: !!token,
-      hasAccessToken: !!token?.accessToken,
+      hasAccessToken: !!accessToken,
+      hasLogin: !!login,
     });
     
-    if (!token?.accessToken) {
-      console.error('[API/GENERATE] ERROR: No access token in JWT');
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!accessToken) {
+      console.error('[API/GENERATE] ERROR: No access token in session');
+      return NextResponse.json({ 
+        error: "No GitHub access token. Please logout and login again." 
+      }, { status: 401 });
     }
     
     // Cria objeto de sessão com accessToken apenas para uso interno
     const sessionWithToken = {
       ...session,
-      accessToken: token.accessToken as string,
-      login: token.login as string,
+      accessToken: accessToken as string,
+      login: login as string,
     };
     
     // 1. Fetch GitHub data

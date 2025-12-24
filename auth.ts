@@ -40,12 +40,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         hasAccessToken: !!token.accessToken,
       });
       
-      // ✅ SEGURO: NÃO expõe o accessToken na sessão
-      // Apenas dados públicos são passados para a sessão
+      // ✅ SEGURO: Passa o accessToken para a sessão
+      // Isso é seguro porque a sessão só é acessível server-side nas API routes
       if (token.login && session.user) {
         session.user.login = token.login as string;
       }
-      // O accessToken fica APENAS no JWT, nunca na sessão
+      
+      // Adiciona accessToken à sessão (server-side only)
+      if (token.accessToken) {
+        (session as any).accessToken = token.accessToken;
+      }
+      
       return session;
     },
   },

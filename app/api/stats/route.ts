@@ -5,7 +5,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getToken } from "next-auth/jwt";
 import { processGitHubStats } from "@/app/lib/stats-processor";
 import { fetchGitHubStats } from "@/app/lib/github-query";
 import { rateLimit, getClientIdentifier } from "@/app/lib/rate-limit";
@@ -42,7 +41,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ✅ SEGURO: Verifica autenticação primeiro
+    // ✅ SEGURO: Usa auth() customizado para obter token
     const session = await auth();
     console.log('[API/STATS] Session check:', {
       hasSession: !!session,
@@ -50,33 +49,42 @@ export async function GET(req: NextRequest) {
       userEmail: session?.user?.email,
     });
     
-    if (!session) {
+    if (!session?.user) {
       console.error('[API/STATS] ERROR: No session found');
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Em NextAuth v5, precisamos acessar o token via callbacks ou request
+    // Vamos usar uma abordagem alternativa: pegar do request context
+    const authHeader = req.headers.get('authorization');
+    console.log('[API/STATS] Checking for access token via alternate methods');
     
-    // ✅ SEGURO: Obtém o token do JWT (server-side only)
-    const token = await getToken({ 
-      req: req as any,
-      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
-    });
+    // Como o token está no JWT (cookie), vamos usar a API do NextAuth
+    // O problema é que getToken() não está funcionando, então vamos
+    // forçar o uso de Server Action
+    const accessToken = (session as any).accessToken;
+    const login = (session as any).user?.login || session.user.name;
     
     console.log('[API/STATS] Token check:', {
-      hasToken: !!token,
-      hasAccessToken: !!token?.accessToken,
-      hasLogin: !!token?.login,
+      hasAccessToken: !!accessToken,
+      hasLogin: !!login,
+      sessionKeys: Object.keys(session),
+      userKeys: Object.keys(session.user),
     });
     
-    if (!token?.accessToken) {
-      console.error('[API/STATS] ERROR: No access token found in JWT');
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!accessToken) {
+      console.error('[API/STATS] ERROR: No access token in session');
+      console.error('[API/STATS] Session object:', JSON.stringify(session, null, 2));
+      return NextResponse.json({ 
+        error: "No GitHub access token. Please logout and login again." 
+      }, { status: 401 });
     }
     
     // Cria objeto de sessão com accessToken apenas para uso interno
     const sessionWithToken = {
       ...session,
-      accessToken: token.accessToken as string,
-      login: token.login as string,
+      accessToken: accessToken as string,
+      login: login as string,
     };
     
     const { data, commitMessages } = await fetchGitHubStats(sessionWithToken);
