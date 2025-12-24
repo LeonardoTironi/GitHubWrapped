@@ -58,11 +58,6 @@ export default async function Home() {
               Made by Leonardo Tironi
             </a>
           </div>
-
-          <p className="max-w-xs text-[10px] text-gray-600 leading-tight">
-            Este projeto não é afiliado ou endossado pelo GitHub Inc. GitHub e
-            as marcas relacionadas são propriedades de seus respectivos donos.
-          </p>
         </footer>
       </main>
     </div>
