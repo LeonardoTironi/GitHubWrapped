@@ -98,12 +98,19 @@ export default function WrappedPage() {
       setLoading(true);
       setError(null);
 
+      console.log('[CLIENT] Starting generateWrapped');
+      console.log('[CLIENT] Document cookies:', document.cookie ? 'Has cookies' : 'No cookies');
+
       const statsResponse = await fetch("/api/stats", {
         credentials: "include",
       });
 
+      console.log('[CLIENT] Stats response status:', statsResponse.status);
+      console.log('[CLIENT] Stats response headers:', Object.fromEntries(statsResponse.headers));
+
       if (!statsResponse.ok) {
         if (statsResponse.status === 401) {
+          console.error('[CLIENT] ERROR: 401 on /api/stats - redirecting to login');
           router.push("/");
           return;
         }
@@ -118,11 +125,14 @@ export default function WrappedPage() {
 
       const statsData = await statsResponse.json();
       setStats(statsData);
+      console.log('[CLIENT] Stats received successfully');
 
       // 2. Generate the image
       const imageResponse = await fetch("/api/generate-wrapped", {
         credentials: "include",
       });
+
+      console.log('[CLIENT] Generate response status:', imageResponse.status);
 
       if (!imageResponse.ok) {
         const errorData = await imageResponse
