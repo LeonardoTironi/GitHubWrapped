@@ -20,13 +20,7 @@ const RATE_LIMIT_CONFIG = { limit: 5, windowInSeconds: 60 };
 
 export async function GET(req: NextRequest) {
   try {
-    console.log('[API/GENERATE] Request received');
-    console.log('[API/GENERATE] Request URL:', req.url);
-    console.log('[API/GENERATE] Has cookies:', req.cookies.getAll().length > 0);
-    console.log('[API/GENERATE] Environment check:', {
-      hasAuthSecret: !!process.env.AUTH_SECRET,
-      hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
-    });
+    
 
     // Check rate limit first (before expensive operations)
     const clientId = getClientIdentifier(req);
@@ -47,10 +41,6 @@ export async function GET(req: NextRequest) {
 
     // ✅ SEGURO: Verifica autenticação
     const session = await auth();
-    console.log('[API/GENERATE] Session check:', {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-    });
     
     if (!session?.user) {
       console.error('[API/GENERATE] ERROR: No session found');
@@ -60,10 +50,6 @@ export async function GET(req: NextRequest) {
     const accessToken = (session as any).accessToken;
     const login = (session as any).user?.login || session.user.name;
     
-    console.log('[API/GENERATE] Token check:', {
-      hasAccessToken: !!accessToken,
-      hasLogin: !!login,
-    });
     
     if (!accessToken) {
       console.error('[API/GENERATE] ERROR: No access token in session');

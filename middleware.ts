@@ -10,11 +10,6 @@ export default auth((req) => {
   const isAuthenticated = !!req.auth;
   const pathname = req.nextUrl.pathname;
   
-  console.log('[MIDDLEWARE]', {
-    path: pathname,
-    authenticated: isAuthenticated,
-    hasCookies: req.cookies.getAll().length > 0,
-  });
 
   if (!isAuthenticated) {
     console.error('[MIDDLEWARE] ERROR: Not authenticated, redirecting to /');
