@@ -13,6 +13,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  trustHost: true, // ✅ Necessário para produção (Vercel)
   callbacks: {
     async jwt({ token, account, profile }) {
       // ✅ SEGURO: Salva o accessToken APENAS no JWT (server-side, criptografado)

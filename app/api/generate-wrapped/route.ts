@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     // ✅ SEGURO: Obtém token do JWT (server-side only)
     const token = await getToken({ 
       req: req,
-      secret: process.env.AUTH_SECRET
+      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
     });
     
     if (!token?.accessToken) {
