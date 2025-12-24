@@ -17,6 +17,7 @@ export interface RawGraphQLData {
       commitContributionsByRepository: Array<{
         repository: {
           name: string;
+          nameWithOwner: string;
           languages: {
             edges: Array<{ size: number; node: { name: string; color: string } }>;
           };

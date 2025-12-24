@@ -89,44 +89,59 @@ export async function fetchGitHubStats(session: {
     auth: session.accessToken,
   });
 
-  // 1. Busca dados do GitHub via GraphQL
   const currentYear = new Date().getFullYear();
+  const fromDate = `${currentYear}-01-01T00:00:00Z`;
+  const toDate = `${currentYear}-12-31T23:59:59Z`;
   const userLogin = session.login || session.user?.login || "";
-  
+
+  // 1. Busca dados do GraphQL (Contagens precisas)
   const data = await octokit.graphql(GITHUB_WRAPPED_QUERY, {
     login: userLogin,
-    from: `${currentYear}-01-01T00:00:00Z`,
-    to: `${currentYear}-12-31T23:59:59Z`,
+    from: fromDate,
+    to: toDate,
   }) as RawGraphQLData;
 
-  // 2. Busca amostra de commits para auditoria (últimos 100)
+  // 2. Busca mensagens de commits
+  // Correção: Usamos os repositórios onde HOUVE contribuição, não apenas os que você é dono
+  const contributedRepos = data.user.contributionsCollection.commitContributionsByRepository;
+  
   const commitMessages: string[] = [];
-  try {
-    const repos = data.user.repositories.nodes.slice(0, 5); // Pega os 5 primeiros repos
-    for (const repo of repos) {
-      if (commitMessages.length >= 100) break;
-      
-      try {
-        const { data: commits } = await octokit.request(
-          "GET /repos/{owner}/{repo}/commits",
-          {
-            owner: userLogin,
-            repo: repo.name,
-            per_page: 20,
-          }
-        );
+  
+  // Define um limite de segurança para não estourar o Rate Limit da API do GitHub
+  // 50 repositórios x 30 commits = 1500 requisições potenciais (cuidado com o limite de 5000/hora)
+  const MAX_REPOS_TO_SCAN = 50; 
+  const COMMITS_PER_REPO = 30; 
+
+  // Ordena por quantidade de contribuições para priorizar os repositórios mais ativos
+  const topRepos = contributedRepos
+    .sort((a, b) => b.contributions.totalCount - a.contributions.totalCount)
+    .slice(0, MAX_REPOS_TO_SCAN);
+
+  // Usamos Promise.all para paralelizar (com cuidado), ou loop for...of para sequencial
+  for (const contribution of topRepos) {
+    // Extrai dono e nome (nameWithOwner vem como "facebook/react")
+    const [owner, repo] = contribution.repository.nameWithOwner.split("/");
+
+    try {
+      const { data: commits } = await octokit.request("GET /repos/{owner}/{repo}/commits", {
+        owner: owner,
+        repo: repo,
+        author: userLogin, // IMPORTANTE: Filtra apenas commits SEUS
+        since: fromDate,   // IMPORTANTE: Dentro do intervalo de tempo
+        until: toDate,
+        per_page: COMMITS_PER_REPO,
+      });
+
+      if (commits.length > 0) {
         commitMessages.push(...commits.map((c) => c.commit.message));
-      } catch (repoError: unknown) {
-        // Ignora erros de repos vazios ou privados
-        const error = repoError as { status?: number; message?: string };
-        if (error.status !== 409 && error.status !== 404) {
-          console.error(`Erro ao buscar commits do repo ${repo.name}:`, error.message);
-        }
-        continue;
+      }
+    } catch (repoError: unknown) {
+      // Tratamento de erro silencioso para repositórios que podem ter deixado de existir ou acesso negado
+      const error = repoError as { status?: number };
+      if (error.status !== 404 && error.status !== 403) {
+        console.warn(`Falha ao ler commits de ${owner}/${repo}`);
       }
     }
-  } catch (err) {
-    console.error("Erro ao buscar commits:", err);
   }
 
   return { data, commitMessages };

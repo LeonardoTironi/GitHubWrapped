@@ -268,29 +268,29 @@ export default function WrappedPage() {
             We've analyzed your GitHub activity. Ready to see your personalized
             2025 developer report?
           </p>
-          <button
-            onClick={generateWrapped}
-            className="group relative flex items-center gap-3 px-12 py-6 bg-slate-900 text-gray-200 text-xl font-bold rounded-full border border-slate-700 transition-all transform hover:scale-105 hover:bg-slate-800 hover:text-white hover:shadow-[0_0_40px_8px_rgba(30,58,138,0.5)] active:scale-95 cursor-pointer shadow-2xl"
-          >
-            {/* Ícone em azul brilhante para contraste */}
-            <svg
-              className="w-6 h-6 text-blue-500 group-hover:text-blue-400 transition-colors"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex flex-row">
+            <button
+              onClick={generateWrapped}
+              className="group relative flex items-center gap-3 px-12 py-6 bg-slate-900 text-gray-200 text-xl font-bold rounded-full border border-slate-700 transition-all transform hover:scale-105 hover:bg-slate-800 hover:text-white hover:shadow-[0_0_40px_8px_rgba(30,58,138,0.5)] active:scale-95 cursor-pointer shadow-2xl"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-            Generate My Wrapped
-            {/* Overlay sutil de cinza no hover */}
-            <span className="absolute inset-0 rounded-full bg-slate-400/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-          <div className="mt-8">
+              {/* Ícone em azul brilhante para contraste */}
+              <svg
+                className="w-6 h-6 text-blue-500 group-hover:text-blue-400 transition-colors"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              Generate My Wrapped
+              {/* Overlay sutil de cinza no hover */}
+              <span className="absolute inset-0 rounded-full bg-slate-400/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
             <LogoutButton />
           </div>
         </div>
