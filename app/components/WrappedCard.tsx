@@ -195,7 +195,7 @@ export const WrappedCard = ({ data }: { data: WrappedData }) => {
         style={{ display: "flex", marginTop: "auto", justifyContent: "center" }}
       >
         <span style={{ fontSize: "16px", color: "#484f58" }}>
-          Generated at dev-wrapped-2025.vercel.app
+          Created at dev-wrapped-2025.vercel.app
         </span>
       </div>
     </div>
