@@ -268,7 +268,7 @@ export default function WrappedPage() {
             We've analyzed your GitHub activity. Ready to see your personalized
             2025 developer report?
           </p>
-          <div className="flex flex-row">
+          <div className="flex flex-row justify-between">
             <button
               onClick={generateWrapped}
               className="group relative flex items-center gap-3 px-12 py-6 bg-slate-900 text-gray-200 text-xl font-bold rounded-full border border-slate-700 transition-all transform hover:scale-105 hover:bg-slate-800 hover:text-white hover:shadow-[0_0_40px_8px_rgba(30,58,138,0.5)] active:scale-95 cursor-pointer shadow-2xl"
