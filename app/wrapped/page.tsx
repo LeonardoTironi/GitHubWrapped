@@ -209,9 +209,7 @@ export default function WrappedPage() {
           <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-pink-400">
             Compiling your year...
           </h2>
-          <p className="text-gray-400 mt-2">
-            Analysing commits and pull requests
-          </p>
+          <p className="text-gray-400 mt-2">Analysing commits</p>
         </div>
       </div>
     );
