@@ -98,7 +98,9 @@ export default function WrappedPage() {
       setLoading(true);
       setError(null);
 
-      const statsResponse = await fetch("/api/stats");
+      const statsResponse = await fetch("/api/stats", {
+        credentials: "include",
+      });
 
       if (!statsResponse.ok) {
         if (statsResponse.status === 401) {
@@ -118,7 +120,9 @@ export default function WrappedPage() {
       setStats(statsData);
 
       // 2. Generate the image
-      const imageResponse = await fetch("/api/generate-wrapped");
+      const imageResponse = await fetch("/api/generate-wrapped", {
+        credentials: "include",
+      });
 
       if (!imageResponse.ok) {
         const errorData = await imageResponse
