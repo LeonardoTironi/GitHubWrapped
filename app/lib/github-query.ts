@@ -1,11 +1,11 @@
 import { Octokit } from "@octokit/core";
 import { RawGraphQLData } from "./stats-processor";
-
+import { paginateRest } from "@octokit/plugin-paginate-rest"; // Você pode precisar adicionar esse plugin se usar o core puro, ou usar 'octokit' package padrão
 /**
  * Query GraphQL para coletar métricas do GitHub
  * Retorna contribuições, linguagens, repositórios e seguidores
  */
-
+const MyOctokit = Octokit.plugin(paginateRest);
 export const GITHUB_WRAPPED_QUERY = `
   query($login: String!, $from: DateTime!, $to: DateTime!) {
     user(login: $login) {
@@ -85,7 +85,8 @@ export async function fetchGitHubStats(session: {
     throw new Error("Não autenticado");
   }
 
-  const octokit = new Octokit({
+  // Instancia com suporte a paginação
+  const octokit = new MyOctokit({
     auth: session.accessToken,
   });
 
@@ -94,52 +95,55 @@ export async function fetchGitHubStats(session: {
   const toDate = `${currentYear}-12-31T23:59:59Z`;
   const userLogin = session.login || session.user?.login || "";
 
-  // 1. Busca dados do GraphQL (Contagens precisas)
+  // 1. GraphQL para estatísticas macro (Rápido e preciso para contagens)
   const data = await octokit.graphql(GITHUB_WRAPPED_QUERY, {
     login: userLogin,
     from: fromDate,
     to: toDate,
   }) as RawGraphQLData;
 
-  // 2. Busca mensagens de commits
-  // Correção: Usamos os repositórios onde HOUVE contribuição, não apenas os que você é dono
+  // 2. Busca mensagens de commits com paginação total
   const contributedRepos = data.user.contributionsCollection.commitContributionsByRepository;
-  
   const commitMessages: string[] = [];
-  
-  // Define um limite de segurança para não estourar o Rate Limit da API do GitHub
-  // 50 repositórios x 30 commits = 1500 requisições potenciais (cuidado com o limite de 5000/hora)
-  const MAX_REPOS_TO_SCAN = 50; 
-  const COMMITS_PER_REPO = 30; 
 
-  // Ordena por quantidade de contribuições para priorizar os repositórios mais ativos
-  const topRepos = contributedRepos
-    .sort((a, b) => b.contributions.totalCount - a.contributions.totalCount)
-    .slice(0, MAX_REPOS_TO_SCAN);
+  // Ordena para garantir que pegamos os repositórios mais importantes primeiro caso dê erro
+  const allRepos = contributedRepos.sort((a, b) => b.contributions.totalCount - a.contributions.totalCount);
 
-  // Usamos Promise.all para paralelizar (com cuidado), ou loop for...of para sequencial
-  for (const contribution of topRepos) {
-    // Extrai dono e nome (nameWithOwner vem como "facebook/react")
+  console.log(`Iniciando busca detalhada em ${allRepos.length} repositórios...`);
+
+  for (const contribution of allRepos) {
     const [owner, repo] = contribution.repository.nameWithOwner.split("/");
+    
+    // Pula repositórios deletados ou sem nome
+    if (!owner || !repo) continue;
 
     try {
-      const { data: commits } = await octokit.request("GET /repos/{owner}/{repo}/commits", {
+      // O método paginate itera automaticamente todas as páginas
+      const commits = await octokit.paginate("GET /repos/{owner}/{repo}/commits", {
         owner: owner,
         repo: repo,
-        author: userLogin, // IMPORTANTE: Filtra apenas commits SEUS
-        since: fromDate,   // IMPORTANTE: Dentro do intervalo de tempo
+        author: userLogin, // Filtra apenas SEUS commits
+        since: fromDate,
         until: toDate,
-        per_page: COMMITS_PER_REPO,
+        per_page: 100, // Máximo permitido por página para reduzir requisições
       });
 
-      if (commits.length > 0) {
-        commitMessages.push(...commits.map((c) => c.commit.message));
-      }
+      // Mapeia apenas as mensagens
+      const messages = commits.map((c: any) => c.commit.message);
+      commitMessages.push(...messages);
+      
+      console.log(`[${owner}/${repo}] ${messages.length} commits encontrados.`);
+
     } catch (repoError: unknown) {
-      // Tratamento de erro silencioso para repositórios que podem ter deixado de existir ou acesso negado
-      const error = repoError as { status?: number };
-      if (error.status !== 404 && error.status !== 403) {
-        console.warn(`Falha ao ler commits de ${owner}/${repo}`);
+      const error = repoError as { status?: number; message?: string };
+      
+      // 409 = Repositório vazio
+      // 404 = Não encontrado (talvez você tenha perdido acesso)
+      // 403 = Forbidden (pode ser restrição de organização ou rate limit)
+      if (error.status === 403) {
+        console.warn(`Acesso negado ou limite atingido em ${owner}/${repo}.`);
+      } else if (error.status !== 409 && error.status !== 404) {
+        console.error(`Erro em ${owner}/${repo}:`, error.message);
       }
     }
   }
