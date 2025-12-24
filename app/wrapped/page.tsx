@@ -269,7 +269,10 @@ export default function WrappedPage() {
             2025 developer report?
           </p>
           <div className="flex justify-center">
-            <button className="group relative flex items-center gap-3 px-12 py-6 bg-slate-900 text-gray-200 text-xl font-bold rounded-full border border-slate-700 transition-all transform hover:scale-105 hover:bg-slate-800 hover:text-white hover:shadow-[0_0_40px_8px_rgba(30,58,138,0.5)] active:scale-95 cursor-pointer shadow-2xl">
+            <button
+              className="group relative flex items-center gap-3 px-12 py-6 bg-slate-900 text-gray-200 text-xl font-bold rounded-full border border-slate-700 transition-all transform hover:scale-105 hover:bg-slate-800 hover:text-white hover:shadow-[0_0_40px_8px_rgba(30,58,138,0.5)] active:scale-95 cursor-pointer shadow-2xl"
+              onClick={generateWrapped}
+            >
               {/* Ícone em azul brilhante para contraste */}
               <svg
                 className="w-6 h-6 text-blue-500 group-hover:text-blue-400 transition-colors"
